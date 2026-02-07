@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig
 	Postgres PostgresConfig
 	Redis    RedisConfig
+	Logger   Logger
 }
 
 type ServerConfig struct {
@@ -49,6 +50,15 @@ type RedisConfig struct {
 	PoolTimeout    int
 	Password       string
 	DB             int
+}
+
+// Logger config
+type Logger struct {
+	Development       bool
+	DisableCaller     bool
+	DisableStacktrace bool
+	Encoding          string
+	Level             string
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {

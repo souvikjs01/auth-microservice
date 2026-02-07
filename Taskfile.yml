@@ -2,6 +2,8 @@ version: "3"
 
 tasks:
   run:
+    env:
+      config: docker
     cmds:
       - go run ./cmd/auth/main.go
 

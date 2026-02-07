@@ -1,0 +1,40 @@
+server:
+  AppVersion: 1.0.0-docker
+  Port: :5000
+  ProfPort: :5555
+  Mode: Development
+  JwtSecretKey: secretKey
+  CookieName: jwt-token
+  ReadTimeout: 10
+  WriteTimeout: 10
+  SSL: true
+  CtxDefaultTimeout: 12
+  CSRF: true
+  Debug: false
+
+postgres:
+  Host: postgresql
+  Port: 5432
+  User: postgres
+  Password: postgres
+  Dbname: simple_auth_db
+  SSLMode: false
+  PgDriver: pgx
+
+redis:
+  RedisAddr: redis:6379
+  RedisPassword:
+  RedisDB: 0
+  RedisDefaultdb: 0
+  MinIdleConns: 200
+  PoolSize: 12000
+  PoolTimeout: 240
+  Password: ""
+  DB: 0
+
+logger:
+  Development: true
+  DisableCaller: false
+  DisableStacktrace: false
+  Encoding: console
+  Level: info
