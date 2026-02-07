@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -15,9 +16,9 @@ const (
 )
 
 func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
-	dsn := c.Postgres.PgURI
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", c.Postgres.Host, c.Server.Port, c.Postgres.User, c.Postgres.Dbname, c.Postgres.Password)
 
-	db, err := sqlx.Connect("pgx", dsn)
+	db, err := sqlx.Connect(c.Postgres.PgDriver, dsn)
 	if err != nil {
 		return nil, err
 	}

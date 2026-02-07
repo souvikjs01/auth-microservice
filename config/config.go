@@ -30,7 +30,13 @@ type ServerConfig struct {
 }
 
 type PostgresConfig struct {
-	PgURI string
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Dbname   string
+	SSLMode  bool
+	PgDriver string
 }
 
 type RedisConfig struct {
