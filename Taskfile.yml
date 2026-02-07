@@ -1,0 +1,18 @@
+version: "3"
+
+tasks:
+  run:
+    cmds:
+      - go run ./cmd/main.go
+
+  proto:
+    cmds:
+      - protoc --go_out=./proto --go-grpc_out=./proto --proto_path=./proto ./proto/*.proto
+
+  tidy:
+    cmds:
+      - go mod tidy
+
+  test:
+    cmds:
+      - go test ./...

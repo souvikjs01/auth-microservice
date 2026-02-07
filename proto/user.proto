@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+
+package userService;
+
+option go_package = ".;userService";
+
+message Session {
+    string session = 1;
+}
+
+message User {
+    string email = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string password = 4;
+    string uid = 5;
+}
+
+message RegisterRequest {
+    string email = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string password = 4;
+}
+
+service UserService {
+    rpc Register(RegisterRequest) returns (User);
+}
