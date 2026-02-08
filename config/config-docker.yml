@@ -38,3 +38,8 @@ logger:
   DisableStacktrace: false
   Encoding: console
   Level: info
+
+jaeger:
+  Host: localhost:6831
+  ServiceName: auth_microservice
+  LogSpans: true

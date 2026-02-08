@@ -13,6 +13,7 @@ type Config struct {
 	Postgres PostgresConfig
 	Redis    RedisConfig
 	Logger   Logger
+	Jaeger   Jaeger
 }
 
 type ServerConfig struct {
@@ -59,6 +60,13 @@ type Logger struct {
 	DisableStacktrace bool
 	Encoding          string
 	Level             string
+}
+
+// Jaeger config
+type Jaeger struct {
+	Host        string
+	ServiceName string
+	LogSpans    bool
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {
