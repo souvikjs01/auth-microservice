@@ -1,0 +1,24 @@
+services:
+  redis:
+    image: redis:8.2.0-alpine
+    container_name: auth_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+
+  postgresql:
+    image: postgres:17-alpine
+    container_name: auth_postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    
+volumes:
+  pgdata:

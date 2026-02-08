@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib" // pgx driver
 	"github.com/jmoiron/sqlx"
 	"github.com/souvikjs01/auth-microservice/config"
 )
@@ -16,7 +17,13 @@ const (
 )
 
 func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", c.Postgres.Host, c.Server.Port, c.Postgres.User, c.Postgres.Dbname, c.Postgres.Password)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
+		c.Postgres.Host,
+		c.Postgres.Port,
+		c.Postgres.User,
+		c.Postgres.Dbname,
+		c.Postgres.Password,
+	)
 
 	db, err := sqlx.Connect(c.Postgres.PgDriver, dsn)
 	if err != nil {

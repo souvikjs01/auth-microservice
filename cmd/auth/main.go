@@ -10,6 +10,8 @@ import (
 	"github.com/souvikjs01/auth-microservice/config"
 	authServergRPC "github.com/souvikjs01/auth-microservice/internal/auth/delivery/grpc/server"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
+	"github.com/souvikjs01/auth-microservice/pkg/postgres"
+	"github.com/souvikjs01/auth-microservice/pkg/redis"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
 	userService "github.com/souvikjs01/auth-microservice/proto"
 	"google.golang.org/grpc"
@@ -37,6 +39,20 @@ func main() {
 
 	appLogger.Infof("AppVersion: %s, LogLevel: %s, Mode: %s, SSL: %v", cfg.Server.AppVersion, cfg.Logger.Level, cfg.Server.Mode, cfg.Server.Ssl)
 	appLogger.Infof("Success parsed config: %v", cfg.Server.AppVersion)
+
+	// postgres conn
+	pgsqlDB, err := postgres.NewPsqlDB(cfg)
+	if err != nil {
+		appLogger.Fatalf("Postgresql init: %s", err)
+	} else {
+		appLogger.Info("Postgresql connected successfully")
+	}
+	defer pgsqlDB.Close()
+
+	// redis conn
+	redisClient := redis.NewRedisClient(cfg)
+	defer redisClient.Close()
+	appLogger.Info("Redis is connected")
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)
 	if err != nil {

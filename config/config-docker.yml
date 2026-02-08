@@ -13,16 +13,16 @@ server:
   Debug: false
 
 postgres:
-  Host: postgresql
+  Host: localhost
   Port: 5432
   User: postgres
   Password: postgres
-  Dbname: simple_auth_db
+  Dbname: auth_db
   SSLMode: false
   PgDriver: pgx
 
 redis:
-  RedisAddr: redis:6379
+  RedisAddr: localhost:6379
   RedisPassword:
   RedisDB: 0
   RedisDefaultdb: 0

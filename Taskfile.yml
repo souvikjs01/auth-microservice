@@ -18,3 +18,8 @@ tasks:
   test:
     cmds:
       - go test ./...
+
+  docker:
+    cmds:
+      - echo "Starting docker containers"
+      - docker-compose -f docker-compose.yml up --build
