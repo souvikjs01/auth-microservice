@@ -3,28 +3,22 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
 	"os"
-	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/souvikjs01/auth-microservice/config"
-	authServergRPC "github.com/souvikjs01/auth-microservice/internal/auth/delivery/grpc/server"
+	"github.com/souvikjs01/auth-microservice/internal/server"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
 	"github.com/souvikjs01/auth-microservice/pkg/postgres"
 	"github.com/souvikjs01/auth-microservice/pkg/redis"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
-	userService "github.com/souvikjs01/auth-microservice/proto"
 	"github.com/uber/jaeger-client-go"
 	jaegerCfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-lib/metrics"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	fmt.Println("hello there")
+	log.Println("Start the user service")
 
 	configPath := utils.GetConfigPath(os.Getenv("config"))
 	fmt.Println(configPath)
@@ -66,8 +60,9 @@ func main() {
 			Param: 1, // sample ALL traces (dev only)
 		},
 		Reporter: &jaegerCfg.ReporterConfig{
-			LogSpans:           cfg.Jaeger.LogSpans,
-			LocalAgentHostPort: cfg.Jaeger.Host,
+			LogSpans:          cfg.Jaeger.LogSpans,
+			CollectorEndpoint: "http://localhost:14268/api/traces",
+			// LocalAgentHostPort: cfg.Jaeger.Host,
 		},
 	}
 
@@ -86,26 +81,6 @@ func main() {
 	defer closer.Close()
 	appLogger.Info("Opentracing connected")
 
-	lis, err := net.Listen("tcp", cfg.Server.Port)
-	if err != nil {
-		appLogger.Fatal(err)
-	}
-
-	server := grpc.NewServer(grpc.KeepaliveParams(
-		keepalive.ServerParameters{
-			MaxConnectionIdle: 5 * time.Minute,
-			Timeout:           15 * time.Second,
-			MaxConnectionAge:  5 * time.Minute,
-		},
-	))
-
-	if cfg.Server.Mode != "Production" {
-		reflection.Register(server)
-	}
-
-	authGrpcServer := authServergRPC.NewAuthServerGrpc(appLogger, cfg)
-	userService.RegisterUserServiceServer(server, authGrpcServer)
-
-	appLogger.Infof("Server is listening on port: %v", cfg.Server.Port)
-	appLogger.Fatal(server.Serve(lis))
+	authServer := server.NewAuthServer(appLogger, cfg)
+	appLogger.Fatal(authServer.Run())
 }
