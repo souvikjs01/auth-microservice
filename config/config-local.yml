@@ -13,7 +13,7 @@ server:
   Debug: false
 
 postgres:
-  Host: localhost
+  Host: postgres
   Port: 5432
   User: postgres
   Password: postgres
@@ -22,7 +22,7 @@ postgres:
   PgDriver: pgx
 
 redis:
-  RedisAddr: localhost:6379
+  RedisAddr: redis:6379
   RedisPassword:
   RedisDB: 0
   RedisDefaultdb: 0
@@ -40,6 +40,6 @@ logger:
   Level: info
 
 jaeger:
-  Host: localhost:6831
+  Host: jaeger:6831
   ServiceName: AUTH_GRPC_SERVER
   LogSpans: true

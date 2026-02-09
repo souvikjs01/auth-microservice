@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
 	userService "github.com/souvikjs01/auth-microservice/proto"
@@ -22,6 +23,9 @@ func NewAuthServerGrpc(logger logger.Logger, cfg *config.Config) *userServer {
 }
 
 func (u *userServer) Register(c context.Context, r *userService.RegisterRequest) (*userService.RegisterResponse, error) {
+	span, c := opentracing.StartSpanFromContext(c, "user.Register")
+	defer span.Finish()
+
 	u.logger.Infof("Get request %s\n", r.String())
 
 	return &userService.RegisterResponse{
