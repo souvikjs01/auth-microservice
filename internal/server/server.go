@@ -4,9 +4,13 @@ import (
 	"net"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/internal/interceptors"
 	authServergRPC "github.com/souvikjs01/auth-microservice/internal/user/delivery/grpc/server"
+	"github.com/souvikjs01/auth-microservice/internal/user/repository"
+	"github.com/souvikjs01/auth-microservice/internal/user/usecase"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
 	userService "github.com/souvikjs01/auth-microservice/proto"
 	"google.golang.org/grpc"
@@ -18,17 +22,23 @@ import (
 type Server struct {
 	logger logger.Logger
 	cfg    *config.Config
+	db     *sqlx.DB
+	redis  *redis.Client
 }
 
-func NewAuthServer(logger logger.Logger, cfg *config.Config) *Server {
+func NewAuthServer(logger logger.Logger, cfg *config.Config, db *sqlx.DB, redis *redis.Client) *Server {
 	return &Server{
 		logger: logger,
 		cfg:    cfg,
+		db:     db,
+		redis:  redis,
 	}
 }
 
 func (s *Server) Run() error {
 	im := interceptors.NewInterceptorManager(s.logger, s.cfg)
+	userRepo := repository.NewUserRepository(s.db)
+	useUC := usecase.NewUserUsecase(s.logger, userRepo)
 
 	lis, err := net.Listen("tcp", s.cfg.Server.Port)
 	if err != nil {
@@ -47,7 +57,7 @@ func (s *Server) Run() error {
 		reflection.Register(server)
 	}
 
-	authGrpcServer := authServergRPC.NewAuthServerGrpc(s.logger, s.cfg)
+	authGrpcServer := authServergRPC.NewAuthServerGrpc(s.logger, s.cfg, useUC)
 	userService.RegisterUserServiceServer(server, authGrpcServer)
 
 	s.logger.Infof("Server is listening on port: %v", s.cfg.Server.Port)

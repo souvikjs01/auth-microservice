@@ -81,6 +81,6 @@ func main() {
 	defer closer.Close()
 	appLogger.Info("Opentracing connected")
 
-	authServer := server.NewAuthServer(appLogger, cfg)
+	authServer := server.NewAuthServer(appLogger, cfg, pgsqlDB, redisClient)
 	appLogger.Fatal(authServer.Run())
 }
