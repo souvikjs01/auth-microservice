@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
 
 package userService;
 
@@ -10,25 +11,36 @@ message Session {
 }
 
 message User {
-    string email = 1;
-    string firstName = 2;
-    string lastName = 3;
+    string uid = 1;
+    string first_name = 2;
+    string last_name = 3;
     string password = 4;
-    string uid = 5;
+    string email = 5;
+    string role = 6;
+    string avatar = 7;
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+    
 }
 
 message RegisterRequest {
     string email = 1;
-    string firstName = 2;
-    string lastName = 3;
+    string first_name = 2;
+    string last_name = 3;
     string password = 4;
+    string role = 5;
+    string avatar = 6;
 }
 
 message RegisterResponse {
-    string email = 1;
-    string firstName = 2;
-    string lastName = 3;
-    string uid = 4;
+    string uid = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string role = 5;
+    string avatar = 6;
+    google.protobuf.Timestamp createdAt = 7;
+    google.protobuf.Timestamp updatedAt = 8;
 }
 
 service UserService {

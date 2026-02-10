@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 	"github.com/souvikjs01/auth-microservice/config"
@@ -51,6 +52,7 @@ func (s *Server) Run() error {
 		MaxConnectionAge:  5 * time.Minute,
 	}),
 		grpc.UnaryInterceptor(im.Logger),
+		grpc.ChainUnaryInterceptor(grpcrecovery.UnaryServerInterceptor()),
 	)
 
 	if s.cfg.Server.Mode != "Production" {

@@ -29,14 +29,3 @@ func InitJaeger(cfg *config.Config) (opentracing.Tracer, io.Closer, error) {
 		jaegerCfg.Metrics(metrics.NullFactory),
 	)
 }
-
-// 	tracer, closer, err := jaegerCfgInstance.NewTracer(
-// 		jaegerCfg.Logger(jaeger.StdLogger),
-// 		jaegerCfg.Metrics(metrics.NullFactory),
-// 	)
-
-// 	if err != nil {
-// 		log.Fatal("can not create tracer", err)
-// 	}
-
-// 	appLogger.Info("Jaeger is connected")

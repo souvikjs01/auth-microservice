@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/internal/models"
@@ -11,6 +13,7 @@ import (
 	userService "github.com/souvikjs01/auth-microservice/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type userServer struct {
@@ -49,6 +52,7 @@ func (u *userServer) Register(c context.Context, r *userService.RegisterRequest)
 		Email:     createdUser.Email,
 		FirstName: createdUser.FirstName,
 		LastName:  createdUser.LastName,
-		Uid:       createdUser.UserID,
+		Uid:       uuid.New().String(),
+		CreatedAt: timestamppb.New(time.Now()),
 	}, nil
 }
