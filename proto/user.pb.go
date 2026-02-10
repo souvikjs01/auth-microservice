@@ -260,14 +260,7 @@ func (x *RegisterRequest) GetAvatar() string {
 
 type RegisterResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           string                 `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	Avatar        string                 `protobuf:"bytes,6,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -302,58 +295,9 @@ func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *RegisterResponse) GetUid() string {
+func (x *RegisterResponse) GetUser() *User {
 	if x != nil {
-		return x.Uid
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetFirstName() string {
-	if x != nil {
-		return x.FirstName
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetLastName() string {
-	if x != nil {
-		return x.LastName
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetRole() string {
-	if x != nil {
-		return x.Role
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetAvatar() string {
-	if x != nil {
-		return x.Avatar
-	}
-	return ""
-}
-
-func (x *RegisterResponse) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *RegisterResponse) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
+		return x.User
 	}
 	return nil
 }
@@ -384,17 +328,9 @@ const file_user_proto_rawDesc = "" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x1a\n" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\x12\x12\n" +
 	"\x04role\x18\x05 \x01(\tR\x04role\x12\x16\n" +
-	"\x06avatar\x18\x06 \x01(\tR\x06avatar\"\x96\x02\n" +
-	"\x10RegisterResponse\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1d\n" +
-	"\n" +
-	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12\x16\n" +
-	"\x06avatar\x18\x06 \x01(\tR\x06avatar\x128\n" +
-	"\tcreatedAt\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x128\n" +
-	"\tupdatedAt\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2V\n" +
+	"\x06avatar\x18\x06 \x01(\tR\x06avatar\"9\n" +
+	"\x10RegisterResponse\x12%\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user2V\n" +
 	"\vUserService\x12G\n" +
 	"\bRegister\x12\x1c.userService.RegisterRequest\x1a\x1d.userService.RegisterResponseB\x0fZ\r.;userServiceb\x06proto3"
 
@@ -421,15 +357,14 @@ var file_user_proto_goTypes = []any{
 var file_user_proto_depIdxs = []int32{
 	4, // 0: userService.User.createdAt:type_name -> google.protobuf.Timestamp
 	4, // 1: userService.User.updatedAt:type_name -> google.protobuf.Timestamp
-	4, // 2: userService.RegisterResponse.createdAt:type_name -> google.protobuf.Timestamp
-	4, // 3: userService.RegisterResponse.updatedAt:type_name -> google.protobuf.Timestamp
-	2, // 4: userService.UserService.Register:input_type -> userService.RegisterRequest
-	3, // 5: userService.UserService.Register:output_type -> userService.RegisterResponse
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	1, // 2: userService.RegisterResponse.user:type_name -> userService.User
+	2, // 3: userService.UserService.Register:input_type -> userService.RegisterRequest
+	3, // 4: userService.UserService.Register:output_type -> userService.RegisterResponse
+	4, // [4:5] is the sub-list for method output_type
+	3, // [3:4] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
