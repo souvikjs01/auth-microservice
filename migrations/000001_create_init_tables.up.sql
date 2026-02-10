@@ -22,13 +22,15 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS citext;
 
+CREATE TYPE role as ENUM ('admin', 'user');
+
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name VARCHAR(32) NOT NULL CHECK (first_name <> ''),
     last_name VARCHAR(32) NOT NULL CHECK (last_name <> ''),
     email CITEXT NOT NULL UNIQUE CHECK (email <> ''),
     password VARCHAR(250) NOT NULL CHECK (octet_length(password) > 0),
-    role VARCHAR(10) NOT NULL DEFAULT 'user',
+    role role NOT NULL DEFAULT 'user',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
