@@ -4,19 +4,24 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	UserID    string    `json:"user_id" db:"user_id" validate:"omitempty"`
+	UserID    uuid.UUID `json:"user_id" db:"user_id" validate:"omitempty"`
 	Email     string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
 	FirstName string    `json:"first_name" db:"first_name" validate:"required,lte=30"`
 	LastName  string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
 	Role      string    `json:"role" db:"role"`
-	Avatar    string    `json:"avatar"`
+	Avatar    string    `json:"avatar" db:"avatar"`
 	Password  string    `json:"password,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at,omitempty" db:"updated_at"`
+}
+
+func (u *User) SanitizePassword() {
+	u.Password = ""
 }
 
 func (u *User) HashPassword() error {
@@ -39,6 +44,7 @@ func (u *User) PrepareCreate() error {
 	if err := u.HashPassword(); err != nil {
 		return err
 	}
+
 	if u.Role != "" {
 		u.Role = strings.TrimSpace(u.Role)
 	}
