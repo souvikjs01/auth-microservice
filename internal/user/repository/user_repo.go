@@ -40,7 +40,7 @@ func (u *UserRepository) FindBYEmail(ctx context.Context, email string) (*models
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserRepository.FindBYEmail")
 	defer span.Finish()
 
-	query := `SELECT user_id, first_name, last_name, email, role, avatar 
+	query := `SELECT user_id, first_name, last_name, email, role, avatar, password, created_at, updated_at
 	          FROM users 
 			  WHERE email=$1`
 
@@ -57,7 +57,7 @@ func (u *UserRepository) FindByID(ctx context.Context, userID uuid.UUID) (*model
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserRepository.FindById")
 	defer span.Finish()
 
-	query := `SELECT user_id, first_name, last_name, email, role, avatar
+	query := `SELECT user_id, first_name, last_name, email, role, avatar, created_at, updated_at
 			  FROM users
 			  WHERE user_id=$1`
 
