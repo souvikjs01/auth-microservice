@@ -11,6 +11,7 @@ import (
 	"github.com/souvikjs01/auth-microservice/pkg/grpc_errors"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
 	userService "github.com/souvikjs01/auth-microservice/proto"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -125,6 +126,39 @@ func (u *userServer) Login(c context.Context, r *userService.LoginRequest) (*use
 	return &userService.LoginResponse{
 		User:      u.userModelToProto(user),
 		SessionId: session,
+	}, nil
+}
+
+// get session id from context and find user by id and return user
+func (u *userServer) GetMe(ctx context.Context, r *userService.GetMeRequest) (*userService.GetMeResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "user.GetMe")
+	defer span.Finish()
+
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		u.logger.Errorf("GetMe: %v", errors.New("no ctx metadata"))
+		return nil, status.Error(codes.Unauthenticated, "No ctx metadata")
+	}
+
+	sessionID := metadata.Get("session_id")
+	if sessionID[0] == "" {
+		u.logger.Errorf("GetMe: %v", errors.New("no session_id in ctx metadata"))
+		return nil, status.Error(codes.Unauthenticated, "No session_id in ctx metadata")
+	}
+
+	session, err := u.sessionUC.GetSessionID(ctx, sessionID[0])
+	if err != nil {
+		u.logger.Errorf("sessionUC.GetSessionID: %v", err)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.GetSessionID: %v", err)
+	}
+
+	user, err := u.userUC.FindByID(ctx, uuid.MustParse(session.UserID))
+	if err != nil {
+		u.logger.Errorf("userUC.FindByID: %v", err)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.FindByID: %v", err)
+	}
+	return &userService.GetMeResponse{
+		User: u.userModelToProto(user),
 	}, nil
 }
 
