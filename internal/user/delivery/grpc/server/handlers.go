@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
@@ -10,6 +11,7 @@ import (
 	"github.com/souvikjs01/auth-microservice/pkg/grpc_errors"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
 	userService "github.com/souvikjs01/auth-microservice/proto"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -83,6 +85,46 @@ func (u *userServer) FindByID(c context.Context, r *userService.FindByIDRequest)
 
 	return &userService.FindByIDResponse{
 		User: u.userModelToProto(user),
+	}, nil
+}
+
+// Login User
+func (u *userServer) Login(c context.Context, r *userService.LoginRequest) (*userService.LoginResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(c, "user.Login")
+	defer span.Finish()
+
+	incomingContext, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		for k, v := range incomingContext {
+			log.Printf("key: %s, value: %v", k, v)
+		}
+	}
+
+	email := r.GetEmail()
+
+	if !utils.ValidateEmail(email) {
+		u.logger.Errorf("invalid email: %s", email)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(errors.New("ErrInvalid email address")), "invalid email: %s", email)
+	}
+
+	user, err := u.userUC.Login(ctx, email, r.GetPassword())
+	if err != nil {
+		u.logger.Errorf("userUC.Login %v", err)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.Login: %v", err)
+	}
+
+	session, err := u.sessionUC.CreateSession(ctx, &models.Session{
+		UserID: user.UserID.String(),
+	}, 3600)
+
+	if err != nil {
+		u.logger.Errorf("sessionUC.CreateSession: %v", err)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.CreateSession: %v", err)
+	}
+
+	return &userService.LoginResponse{
+		User:      u.userModelToProto(user),
+		SessionId: session,
 	}, nil
 }
 
