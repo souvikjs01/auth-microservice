@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	"github.com/souvikjs01/auth-microservice/internal/models"
 	"github.com/souvikjs01/auth-microservice/internal/user"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
@@ -34,7 +35,14 @@ func (u *UserUsecase) FindBYEmail(ctx context.Context, email string) (*models.Us
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.FindBYEmail")
 	defer span.Finish()
 
-	return u.userRepo.FindBYEmail(ctx, email)
+	findEmail, err := u.userRepo.FindBYEmail(ctx, email)
+	if err != nil {
+		return nil, errors.Wrap(err, "userRepo.FindByEmail")
+	}
+
+	findEmail.SanitizePassword()
+
+	return findEmail, nil
 }
 
 // find by id
@@ -43,4 +51,21 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID uuid.UUID) (*models.U
 	defer span.Finish()
 
 	return u.userRepo.FindByID(ctx, userID)
+}
+
+// login user
+func (u *UserUsecase) Login(ctx context.Context, email, password string) (*models.User, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.Login")
+	defer span.Finish()
+
+	findUser, err := u.userRepo.FindBYEmail(ctx, email)
+	if err != nil {
+		return nil, errors.Wrap(err, "userRepo.FindByEmail")
+	}
+
+	if err := findUser.ComparePasswords(password); err != nil {
+		return nil, errors.Wrap(err, "user.ComparePasswords")
+	}
+
+	return findUser, nil
 }
