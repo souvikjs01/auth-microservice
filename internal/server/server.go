@@ -9,6 +9,8 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/internal/interceptors"
+	sessionRepository "github.com/souvikjs01/auth-microservice/internal/session/repository"
+	sessionUseCase "github.com/souvikjs01/auth-microservice/internal/session/usecase"
 	authServergRPC "github.com/souvikjs01/auth-microservice/internal/user/delivery/grpc/server"
 	"github.com/souvikjs01/auth-microservice/internal/user/repository"
 	"github.com/souvikjs01/auth-microservice/internal/user/usecase"
@@ -40,6 +42,8 @@ func (s *Server) Run() error {
 	im := interceptors.NewInterceptorManager(s.logger, s.cfg)
 	userRepo := repository.NewUserRepository(s.db)
 	useUC := usecase.NewUserUsecase(s.logger, userRepo)
+	sessionRepo := sessionRepository.NewSessionRepository(s.redis, s.cfg)
+	sessionUC := sessionUseCase.NewSessionUseCase(sessionRepo, s.cfg)
 
 	lis, err := net.Listen("tcp", s.cfg.Server.Port)
 	if err != nil {
@@ -59,7 +63,7 @@ func (s *Server) Run() error {
 		reflection.Register(server)
 	}
 
-	authGrpcServer := authServergRPC.NewAuthServerGrpc(s.logger, s.cfg, useUC)
+	authGrpcServer := authServergRPC.NewAuthServerGrpc(s.logger, s.cfg, useUC, sessionUC)
 	userService.RegisterUserServiceServer(server, authGrpcServer)
 
 	s.logger.Infof("Server is listening on port: %v", s.cfg.Server.Port)

@@ -11,4 +11,5 @@ type UserUseCase interface {
 	Register(ctx context.Context, user *models.User) (*models.User, error)
 	FindBYEmail(ctx context.Context, email string) (*models.User, error)
 	FindByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
+	Login(ctx context.Context, email, password string) (*models.User, error)
 }
