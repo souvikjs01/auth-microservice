@@ -14,6 +14,7 @@ type Config struct {
 	Redis    RedisConfig
 	Logger   Logger
 	Jaeger   Jaeger
+	Session  Session
 }
 
 type ServerConfig struct {
@@ -67,6 +68,13 @@ type Jaeger struct {
 	Host        string
 	ServiceName string
 	LogSpans    bool
+}
+
+// Session config
+type Session struct {
+	Name   string
+	Prefix string
+	Expire int
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {

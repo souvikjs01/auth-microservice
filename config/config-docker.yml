@@ -43,3 +43,8 @@ jaeger:
   Host: localhost:6831
   ServiceName: AUTH_GRPC_SERVER
   LogSpans: true
+
+session:
+  Name: session-id
+  Prefix: api-session
+  Expire: 3600
