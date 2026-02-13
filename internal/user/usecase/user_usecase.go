@@ -12,14 +12,16 @@ import (
 )
 
 type UserUsecase struct {
-	logger   logger.Logger
-	userRepo user.UserRepository
+	logger        logger.Logger
+	userPgRepo    user.UserPGRepository
+	userRedisRepo user.UserRedisRepository
 }
 
-func NewUserUsecase(logger logger.Logger, userRepo user.UserRepository) *UserUsecase {
+func NewUserUsecase(logger logger.Logger, userRepo user.UserPGRepository, userRedisRepo user.UserRedisRepository) *UserUsecase {
 	return &UserUsecase{
-		logger:   logger,
-		userRepo: userRepo,
+		logger:        logger,
+		userPgRepo:    userRepo,
+		userRedisRepo: userRedisRepo,
 	}
 }
 
@@ -27,7 +29,7 @@ func (u *UserUsecase) Register(ctx context.Context, user *models.User) (*models.
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.Register")
 	defer span.Finish()
 
-	return u.userRepo.Create(ctx, user)
+	return u.userPgRepo.Create(ctx, user)
 }
 
 // find by email
@@ -35,9 +37,9 @@ func (u *UserUsecase) FindBYEmail(ctx context.Context, email string) (*models.Us
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.FindBYEmail")
 	defer span.Finish()
 
-	findEmail, err := u.userRepo.FindBYEmail(ctx, email)
+	findEmail, err := u.userPgRepo.FindBYEmail(ctx, email)
 	if err != nil {
-		return nil, errors.Wrap(err, "userRepo.FindByEmail")
+		return nil, errors.Wrap(err, "userPgRepo.FindByEmail")
 	}
 
 	findEmail.SanitizePassword()
@@ -50,7 +52,19 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID uuid.UUID) (*models.U
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.FindByID")
 	defer span.Finish()
 
-	return u.userRepo.FindByID(ctx, userID)
+	if cashedUser := u.userRedisRepo.GetByIdCtx(ctx, userID.String()); cashedUser != nil {
+		u.logger.Infof("userUC.FindByID.Cashed user: %v", cashedUser)
+		return cashedUser, nil
+	}
+
+	foundUser, err := u.userPgRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "userUC.FindByID.userPgRepo.FindByID")
+	}
+
+	u.userRedisRepo.SetUserCtx(ctx, userID.String(), 3600, foundUser)
+
+	return foundUser, nil
 }
 
 // login user
@@ -58,9 +72,9 @@ func (u *UserUsecase) Login(ctx context.Context, email, password string) (*model
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.Login")
 	defer span.Finish()
 
-	findUser, err := u.userRepo.FindBYEmail(ctx, email)
+	findUser, err := u.userPgRepo.FindBYEmail(ctx, email)
 	if err != nil {
-		return nil, errors.Wrap(err, "userRepo.FindByEmail")
+		return nil, errors.Wrap(err, "userPgRepo.FindByEmail")
 	}
 
 	if err := findUser.ComparePasswords(password); err != nil {
