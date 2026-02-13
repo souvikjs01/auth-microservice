@@ -662,6 +662,78 @@ func (x *GetMeResponse) GetUser() *User {
 	return nil
 }
 
+type LogoutRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutRequest) Reset() {
+	*x = LogoutRequest{}
+	mi := &file_user_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutRequest) ProtoMessage() {}
+
+func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
+func (*LogoutRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{12}
+}
+
+type LogoutResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutResponse) Reset() {
+	*x = LogoutResponse{}
+	mi := &file_user_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutResponse) ProtoMessage() {}
+
+func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
+func (*LogoutResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{13}
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
@@ -708,13 +780,16 @@ const file_user_proto_rawDesc = "" +
 	"session_id\x18\x02 \x01(\tR\tsessionId\"\x0e\n" +
 	"\fGetMeRequest\"6\n" +
 	"\rGetMeResponse\x12%\n" +
-	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user2\xf1\x02\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user\"\x0f\n" +
+	"\rLogoutRequest\"\x10\n" +
+	"\x0eLogoutResponse2\xb4\x03\n" +
 	"\vUserService\x12G\n" +
 	"\bRegister\x12\x1c.userService.RegisterRequest\x1a\x1d.userService.RegisterResponse\x12P\n" +
 	"\vFindByEmail\x12\x1f.userService.FindByEmailRequest\x1a .userService.FindByEmailResponse\x12G\n" +
 	"\bFindByID\x12\x1c.userService.FindByIDRequest\x1a\x1d.userService.FindByIDResponse\x12>\n" +
 	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponse\x12>\n" +
-	"\x05GetMe\x12\x19.userService.GetMeRequest\x1a\x1a.userService.GetMeResponseB\x0fZ\r.;userServiceb\x06proto3"
+	"\x05GetMe\x12\x19.userService.GetMeRequest\x1a\x1a.userService.GetMeResponse\x12A\n" +
+	"\x06Logout\x12\x1a.userService.LogoutRequest\x1a\x1b.userService.LogoutResponseB\x0fZ\r.;userServiceb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -728,7 +803,7 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_user_proto_goTypes = []any{
 	(*Session)(nil),               // 0: userService.Session
 	(*User)(nil),                  // 1: userService.User
@@ -742,11 +817,13 @@ var file_user_proto_goTypes = []any{
 	(*LoginResponse)(nil),         // 9: userService.LoginResponse
 	(*GetMeRequest)(nil),          // 10: userService.GetMeRequest
 	(*GetMeResponse)(nil),         // 11: userService.GetMeResponse
-	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*LogoutRequest)(nil),         // 12: userService.LogoutRequest
+	(*LogoutResponse)(nil),        // 13: userService.LogoutResponse
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
 var file_user_proto_depIdxs = []int32{
-	12, // 0: userService.User.createdAt:type_name -> google.protobuf.Timestamp
-	12, // 1: userService.User.updatedAt:type_name -> google.protobuf.Timestamp
+	14, // 0: userService.User.createdAt:type_name -> google.protobuf.Timestamp
+	14, // 1: userService.User.updatedAt:type_name -> google.protobuf.Timestamp
 	1,  // 2: userService.RegisterResponse.user:type_name -> userService.User
 	1,  // 3: userService.FindByEmailResponse.user:type_name -> userService.User
 	1,  // 4: userService.FindByIDResponse.user:type_name -> userService.User
@@ -757,13 +834,15 @@ var file_user_proto_depIdxs = []int32{
 	6,  // 9: userService.UserService.FindByID:input_type -> userService.FindByIDRequest
 	8,  // 10: userService.UserService.Login:input_type -> userService.LoginRequest
 	10, // 11: userService.UserService.GetMe:input_type -> userService.GetMeRequest
-	3,  // 12: userService.UserService.Register:output_type -> userService.RegisterResponse
-	5,  // 13: userService.UserService.FindByEmail:output_type -> userService.FindByEmailResponse
-	7,  // 14: userService.UserService.FindByID:output_type -> userService.FindByIDResponse
-	9,  // 15: userService.UserService.Login:output_type -> userService.LoginResponse
-	11, // 16: userService.UserService.GetMe:output_type -> userService.GetMeResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
+	12, // 12: userService.UserService.Logout:input_type -> userService.LogoutRequest
+	3,  // 13: userService.UserService.Register:output_type -> userService.RegisterResponse
+	5,  // 14: userService.UserService.FindByEmail:output_type -> userService.FindByEmailResponse
+	7,  // 15: userService.UserService.FindByID:output_type -> userService.FindByIDResponse
+	9,  // 16: userService.UserService.Login:output_type -> userService.LoginResponse
+	11, // 17: userService.UserService.GetMe:output_type -> userService.GetMeResponse
+	13, // 18: userService.UserService.Logout:output_type -> userService.LogoutResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -780,7 +859,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
