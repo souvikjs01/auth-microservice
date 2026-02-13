@@ -116,7 +116,7 @@ func (u *userServer) Login(c context.Context, r *userService.LoginRequest) (*use
 
 	session, err := u.sessionUC.CreateSession(ctx, &models.Session{
 		UserID: user.UserID.String(),
-	}, 3600)
+	}, u.cfg.Session.Expire)
 
 	if err != nil {
 		u.logger.Errorf("sessionUC.CreateSession: %v", err)
@@ -134,19 +134,13 @@ func (u *userServer) GetMe(ctx context.Context, r *userService.GetMeRequest) (*u
 	span, ctx := opentracing.StartSpanFromContext(ctx, "user.GetMe")
 	defer span.Finish()
 
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		u.logger.Errorf("GetMe: %v", errors.New("no ctx metadata"))
-		return nil, status.Error(codes.Unauthenticated, "No ctx metadata")
+	sessionID, err := u.getSessionIDFromContext(ctx)
+	if err != nil {
+		u.logger.Errorf("getSessionIDFromContext: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "no context data received")
 	}
 
-	sessionID := metadata.Get("session_id")
-	if sessionID[0] == "" {
-		u.logger.Errorf("GetMe: %v", errors.New("no session_id in ctx metadata"))
-		return nil, status.Error(codes.Unauthenticated, "No session_id in ctx metadata")
-	}
-
-	session, err := u.sessionUC.GetSessionID(ctx, sessionID[0])
+	session, err := u.sessionUC.GetSessionID(ctx, sessionID)
 	if err != nil {
 		u.logger.Errorf("sessionUC.GetSessionID: %v", err)
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.GetSessionID: %v", err)
@@ -160,6 +154,40 @@ func (u *userServer) GetMe(ctx context.Context, r *userService.GetMeRequest) (*u
 	return &userService.GetMeResponse{
 		User: u.userModelToProto(user),
 	}, nil
+}
+
+// Logout user and delete current session
+func (u *userServer) Logout(ctx context.Context, r *userService.LogoutRequest) (*userService.LogoutResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "user.Logout")
+	defer span.Finish()
+
+	sessionID, err := u.getSessionIDFromContext(ctx)
+	if err != nil {
+		u.logger.Errorf("getSessionIDFromContext: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "no context data received")
+	}
+
+	if err := u.sessionUC.DeleteByID(ctx, sessionID); err != nil {
+		u.logger.Errorf("sessionUC.DeleteByID: %v", err)
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.DeleteByID: %v", err)
+	}
+
+	return &userService.LogoutResponse{}, nil
+}
+
+// helper methods
+func (u *userServer) getSessionIDFromContext(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", status.Error(codes.Unauthenticated, "No ctx data")
+	}
+
+	sessionID := md.Get("session_id")
+	if sessionID[0] == "" {
+		return "", status.Error(codes.Unauthenticated, "No session_id in ctx metadata")
+	}
+
+	return sessionID[0], nil
 }
 
 func (u *userServer) registerRequestToUserModel(r *userService.RegisterRequest) (*models.User, error) {
