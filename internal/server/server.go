@@ -11,11 +11,11 @@ import (
 	"github.com/souvikjs01/auth-microservice/internal/interceptors"
 	sessionRepository "github.com/souvikjs01/auth-microservice/internal/session/repository"
 	sessionUseCase "github.com/souvikjs01/auth-microservice/internal/session/usecase"
-	authServergRPC "github.com/souvikjs01/auth-microservice/internal/user/delivery/grpc/server"
+	authServergRPC "github.com/souvikjs01/auth-microservice/internal/user/delivery/grpc/service"
 	"github.com/souvikjs01/auth-microservice/internal/user/repository"
 	"github.com/souvikjs01/auth-microservice/internal/user/usecase"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
-	userService "github.com/souvikjs01/auth-microservice/proto"
+	userProtoService "github.com/souvikjs01/auth-microservice/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
@@ -40,8 +40,9 @@ func NewAuthServer(logger logger.Logger, cfg *config.Config, db *sqlx.DB, redis 
 
 func (s *Server) Run() error {
 	im := interceptors.NewInterceptorManager(s.logger, s.cfg)
-	userRepo := repository.NewUserRepository(s.db)
-	useUC := usecase.NewUserUsecase(s.logger, userRepo)
+	userPgRepo := repository.NewUserRepository(s.db)
+	userRedisRepo := repository.NewUserRedisRepository(s.redis, s.logger)
+	useUC := usecase.NewUserUsecase(s.logger, userPgRepo, userRedisRepo)
 	sessionRepo := sessionRepository.NewSessionRepository(s.redis, s.cfg)
 	sessionUC := sessionUseCase.NewSessionUseCase(sessionRepo, s.cfg)
 
@@ -51,9 +52,10 @@ func (s *Server) Run() error {
 	}
 
 	server := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
-		MaxConnectionIdle: 5 * time.Minute,
-		Timeout:           15 * time.Second,
-		MaxConnectionAge:  5 * time.Minute,
+		MaxConnectionIdle: s.cfg.Server.MaxConnectionIdle * time.Minute,
+		Timeout:           s.cfg.Server.Timeout * time.Second,
+		MaxConnectionAge:  s.cfg.Server.MaxConnectionAge * time.Minute,
+		Time:              s.cfg.Server.Time * time.Minute,
 	}),
 		grpc.UnaryInterceptor(im.Logger),
 		grpc.ChainUnaryInterceptor(grpcrecovery.UnaryServerInterceptor()),
@@ -64,7 +66,7 @@ func (s *Server) Run() error {
 	}
 
 	authGrpcServer := authServergRPC.NewAuthServerGrpc(s.logger, s.cfg, useUC, sessionUC)
-	userService.RegisterUserServiceServer(server, authGrpcServer)
+	userProtoService.RegisterUserServiceServer(server, authGrpcServer)
 
 	s.logger.Infof("Server is listening on port: %v", s.cfg.Server.Port)
 	if err := server.Serve(lis); err != nil {
