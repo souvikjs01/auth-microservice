@@ -30,6 +30,10 @@ type ServerConfig struct {
 	CtxDefaultTimeout time.Duration
 	CSRF              bool
 	Debug             bool
+	MaxConnectionIdle time.Duration
+	Timeout           time.Duration
+	MaxConnectionAge  time.Duration
+	Time              time.Duration
 }
 
 type PostgresConfig struct {
