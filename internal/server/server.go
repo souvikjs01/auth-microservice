@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/internal/interceptors"
+	metric "github.com/souvikjs01/auth-microservice/internal/metric"
 	sessionRepository "github.com/souvikjs01/auth-microservice/internal/session/repository"
 	sessionUseCase "github.com/souvikjs01/auth-microservice/internal/session/usecase"
 	authServergRPC "github.com/souvikjs01/auth-microservice/internal/user/delivery/grpc/service"
@@ -39,7 +40,13 @@ func NewAuthServer(logger logger.Logger, cfg *config.Config, db *sqlx.DB, redis 
 }
 
 func (s *Server) Run() error {
-	im := interceptors.NewInterceptorManager(s.logger, s.cfg)
+	metrics, err := metric.CreateMetrics(s.cfg.Metrics.Url, s.cfg.Metrics.ServiceName)
+	if err != nil {
+		s.logger.Errorf("metric.CreateMetrics: %v", err)
+		return err
+	}
+	s.logger.Infof("Metrics available url: %v, serviceName: %v", s.cfg.Metrics.Url, s.cfg.Metrics.ServiceName)
+	im := interceptors.NewInterceptorManager(s.logger, s.cfg, metrics)
 	userPgRepo := repository.NewUserRepository(s.db)
 	userRedisRepo := repository.NewUserRedisRepository(s.redis, s.logger)
 	useUC := usecase.NewUserUsecase(s.logger, userPgRepo, userRedisRepo)
@@ -50,6 +57,7 @@ func (s *Server) Run() error {
 	if err != nil {
 		return err
 	}
+	defer lis.Close()
 
 	server := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
 		MaxConnectionIdle: s.cfg.Server.MaxConnectionIdle * time.Minute,
