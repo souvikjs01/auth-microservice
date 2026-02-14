@@ -1,23 +1,23 @@
-package server
+package service
 
 import (
 	"github.com/souvikjs01/auth-microservice/config"
 	"github.com/souvikjs01/auth-microservice/internal/session"
 	"github.com/souvikjs01/auth-microservice/internal/user"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
-	userService "github.com/souvikjs01/auth-microservice/proto"
+	userProtoService "github.com/souvikjs01/auth-microservice/proto"
 )
 
-type userServer struct {
-	userService.UnimplementedUserServiceServer
+type userService struct {
+	userProtoService.UnimplementedUserServiceServer
 	logger    logger.Logger
 	cfg       *config.Config
 	userUC    user.UserUseCase
 	sessionUC session.SessionUseCase
 }
 
-func NewAuthServerGrpc(logger logger.Logger, cfg *config.Config, userUC user.UserUseCase, sessionUC session.SessionUseCase) *userServer {
-	return &userServer{
+func NewAuthServerGrpc(logger logger.Logger, cfg *config.Config, userUC user.UserUseCase, sessionUC session.SessionUseCase) *userService {
+	return &userService{
 		logger:    logger,
 		cfg:       cfg,
 		userUC:    userUC,

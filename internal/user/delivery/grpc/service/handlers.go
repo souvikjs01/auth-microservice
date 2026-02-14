@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/souvikjs01/auth-microservice/internal/models"
 	"github.com/souvikjs01/auth-microservice/pkg/grpc_errors"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
-	userService "github.com/souvikjs01/auth-microservice/proto"
+	userProtoService "github.com/souvikjs01/auth-microservice/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -18,7 +18,7 @@ import (
 )
 
 // Register User
-func (u *userServer) Register(c context.Context, r *userService.RegisterRequest) (*userService.RegisterResponse, error) {
+func (u *userService) Register(c context.Context, r *userProtoService.RegisterRequest) (*userProtoService.RegisterResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(c, "user.Register")
 	defer span.Finish()
 
@@ -39,13 +39,13 @@ func (u *userServer) Register(c context.Context, r *userService.RegisterRequest)
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.Register: %v", err)
 	}
 
-	return &userService.RegisterResponse{
+	return &userProtoService.RegisterResponse{
 		User: u.userModelToProto(createdUser),
 	}, nil
 }
 
 // FindByEmail User
-func (u *userServer) FindByEmail(c context.Context, r *userService.FindByEmailRequest) (*userService.FindByEmailResponse, error) {
+func (u *userService) FindByEmail(c context.Context, r *userProtoService.FindByEmailRequest) (*userProtoService.FindByEmailResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(c, "user.FindByEmail")
 	defer span.Finish()
 
@@ -62,13 +62,13 @@ func (u *userServer) FindByEmail(c context.Context, r *userService.FindByEmailRe
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.FindBYEmail: %v", err)
 	}
 
-	return &userService.FindByEmailResponse{
+	return &userProtoService.FindByEmailResponse{
 		User: u.userModelToProto(user),
 	}, nil
 }
 
 // find by id
-func (u *userServer) FindByID(c context.Context, r *userService.FindByIDRequest) (*userService.FindByIDResponse, error) {
+func (u *userService) FindByID(c context.Context, r *userProtoService.FindByIDRequest) (*userProtoService.FindByIDResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(c, "user.FindByID")
 	defer span.Finish()
 
@@ -84,13 +84,13 @@ func (u *userServer) FindByID(c context.Context, r *userService.FindByIDRequest)
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.FindByID: %v", err)
 	}
 
-	return &userService.FindByIDResponse{
+	return &userProtoService.FindByIDResponse{
 		User: u.userModelToProto(user),
 	}, nil
 }
 
 // Login User
-func (u *userServer) Login(c context.Context, r *userService.LoginRequest) (*userService.LoginResponse, error) {
+func (u *userService) Login(c context.Context, r *userProtoService.LoginRequest) (*userProtoService.LoginResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(c, "user.Login")
 	defer span.Finish()
 
@@ -123,21 +123,21 @@ func (u *userServer) Login(c context.Context, r *userService.LoginRequest) (*use
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.CreateSession: %v", err)
 	}
 
-	return &userService.LoginResponse{
+	return &userProtoService.LoginResponse{
 		User:      u.userModelToProto(user),
 		SessionId: session,
 	}, nil
 }
 
 // get session id from context and find user by id and return user
-func (u *userServer) GetMe(ctx context.Context, r *userService.GetMeRequest) (*userService.GetMeResponse, error) {
+func (u *userService) GetMe(ctx context.Context, r *userProtoService.GetMeRequest) (*userProtoService.GetMeResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "user.GetMe")
 	defer span.Finish()
 
 	sessionID, err := u.getSessionIDFromContext(ctx)
 	if err != nil {
 		u.logger.Errorf("getSessionIDFromContext: %v", err)
-		return nil, status.Errorf(codes.Unauthenticated, "no context data received")
+		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "no context data received")
 	}
 
 	session, err := u.sessionUC.GetSessionID(ctx, sessionID)
@@ -151,13 +151,13 @@ func (u *userServer) GetMe(ctx context.Context, r *userService.GetMeRequest) (*u
 		u.logger.Errorf("userUC.FindByID: %v", err)
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "userUC.FindByID: %v", err)
 	}
-	return &userService.GetMeResponse{
+	return &userProtoService.GetMeResponse{
 		User: u.userModelToProto(user),
 	}, nil
 }
 
 // Logout user and delete current session
-func (u *userServer) Logout(ctx context.Context, r *userService.LogoutRequest) (*userService.LogoutResponse, error) {
+func (u *userService) Logout(ctx context.Context, r *userProtoService.LogoutRequest) (*userProtoService.LogoutResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "user.Logout")
 	defer span.Finish()
 
@@ -172,11 +172,11 @@ func (u *userServer) Logout(ctx context.Context, r *userService.LogoutRequest) (
 		return nil, status.Errorf(grpc_errors.ParseGRPCErrStatusCode(err), "sessionUC.DeleteByID: %v", err)
 	}
 
-	return &userService.LogoutResponse{}, nil
+	return &userProtoService.LogoutResponse{}, nil
 }
 
 // helper methods
-func (u *userServer) getSessionIDFromContext(ctx context.Context) (string, error) {
+func (u *userService) getSessionIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "No ctx data")
@@ -184,13 +184,13 @@ func (u *userServer) getSessionIDFromContext(ctx context.Context) (string, error
 
 	sessionID := md.Get("session_id")
 	if sessionID[0] == "" {
-		return "", status.Error(codes.Unauthenticated, "No session_id in ctx metadata")
+		return "", status.Error(codes.PermissionDenied, "No session_id in ctx metadata")
 	}
 
 	return sessionID[0], nil
 }
 
-func (u *userServer) registerRequestToUserModel(r *userService.RegisterRequest) (*models.User, error) {
+func (u *userService) registerRequestToUserModel(r *userProtoService.RegisterRequest) (*models.User, error) {
 	candidate := &models.User{
 		Email:     r.GetEmail(),
 		FirstName: r.GetFirstName(),
@@ -207,8 +207,8 @@ func (u *userServer) registerRequestToUserModel(r *userService.RegisterRequest) 
 	return candidate, nil
 }
 
-func (u *userServer) userModelToProto(user *models.User) *userService.User {
-	userProto := &userService.User{
+func (u *userService) userModelToProto(user *models.User) *userProtoService.User {
+	userProto := &userProtoService.User{
 		Uid:       user.UserID.String(),
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
