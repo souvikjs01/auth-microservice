@@ -8,7 +8,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/souvikjs01/auth-microservice/internal/models"
 	"github.com/souvikjs01/auth-microservice/internal/user"
+	"github.com/souvikjs01/auth-microservice/pkg/grpc_errors"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
+)
+
+const (
+	userByIdCashedDuration = 3600
 )
 
 type UserUsecase struct {
@@ -28,6 +33,11 @@ func NewUserUsecase(logger logger.Logger, userRepo user.UserPGRepository, userRe
 func (u *UserUsecase) Register(ctx context.Context, user *models.User) (*models.User, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.Register")
 	defer span.Finish()
+
+	existedUser, err := u.userPgRepo.FindBYEmail(ctx, user.Email)
+	if err == nil && existedUser != nil {
+		return nil, grpc_errors.ErrEmailExists
+	}
 
 	return u.userPgRepo.Create(ctx, user)
 }
@@ -62,7 +72,7 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID uuid.UUID) (*models.U
 		return nil, errors.Wrap(err, "userUC.FindByID.userPgRepo.FindByID")
 	}
 
-	u.userRedisRepo.SetUserCtx(ctx, userID.String(), 3600, foundUser)
+	u.userRedisRepo.SetUserCtx(ctx, userID.String(), userByIdCashedDuration, foundUser)
 
 	return foundUser, nil
 }
@@ -74,7 +84,7 @@ func (u *UserUsecase) Login(ctx context.Context, email, password string) (*model
 
 	findUser, err := u.userPgRepo.FindBYEmail(ctx, email)
 	if err != nil {
-		return nil, errors.Wrap(err, "userPgRepo.FindByEmail")
+		return nil, errors.Wrap(err, "userusecase.login.userPgRepo.FindByEmail")
 	}
 
 	if err := findUser.ComparePasswords(password); err != nil {
