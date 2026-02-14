@@ -15,6 +15,7 @@ type Config struct {
 	Logger   Logger
 	Jaeger   Jaeger
 	Session  Session
+	Metrics  Metrics
 }
 
 type ServerConfig struct {
@@ -79,6 +80,12 @@ type Session struct {
 	Name   string
 	Prefix string
 	Expire int
+}
+
+// Metrics config
+type Metrics struct {
+	Url         string
+	ServiceName string
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {

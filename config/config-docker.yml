@@ -52,3 +52,7 @@ session:
   Name: session-id
   Prefix: api-session
   Expire: 3600
+
+metrics:
+  Url: 0.0.0.0:7070
+  ServiceName: AUTH_MICROSERVICE

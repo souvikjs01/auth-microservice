@@ -46,3 +46,7 @@ jaeger:
   Host: jaeger:6831
   ServiceName: AUTH_GRPC_SERVER
   LogSpans: true
+
+metrics:
+  Url: 0.0.0.0:7070
+  ServiceName: AUTH_MICROSERVICE
