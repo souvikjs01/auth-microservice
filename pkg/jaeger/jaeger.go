@@ -20,8 +20,7 @@ func InitJaeger(cfg *config.Config) (opentracing.Tracer, io.Closer, error) {
 		},
 		Reporter: &jaegerCfg.ReporterConfig{
 			LogSpans:          cfg.Jaeger.LogSpans,
-			CollectorEndpoint: "http://localhost:14268/api/traces",
-			// LocalAgentHostPort: cfg.Jaeger.Host,
+			CollectorEndpoint: cfg.Jaeger.Host,    //"http://localhost:14268/api/traces"
 		},
 	}
 	return jaegerCfgInstance.NewTracer(
