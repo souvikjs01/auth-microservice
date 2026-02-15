@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"github.com/souvikjs01/auth-microservice/internal/models"
 	"github.com/souvikjs01/auth-microservice/internal/user"
 	"github.com/souvikjs01/auth-microservice/pkg/grpc_errors"
@@ -62,7 +63,12 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID uuid.UUID) (*models.U
 	span, ctx := opentracing.StartSpanFromContext(ctx, "UserUsecase.FindByID")
 	defer span.Finish()
 
-	if cashedUser := u.userRedisRepo.GetByIdCtx(ctx, userID.String()); cashedUser != nil {
+	cashedUser, err := u.userRedisRepo.GetByIdCtx(ctx, userID.String())
+	if err != nil && !errors.Is(err, redis.Nil) {
+		u.logger.Errorf("userUC.FindByID.Cashed user error: %v", err)
+	}
+
+	if cashedUser != nil {
 		u.logger.Infof("userUC.FindByID.Cashed user: %v", cashedUser)
 		return cashedUser, nil
 	}
@@ -72,7 +78,9 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID uuid.UUID) (*models.U
 		return nil, errors.Wrap(err, "userUC.FindByID.userPgRepo.FindByID")
 	}
 
-	u.userRedisRepo.SetUserCtx(ctx, userID.String(), userByIdCashedDuration, foundUser)
+	if err := u.userRedisRepo.SetUserCtx(ctx, userID.String(), userByIdCashedDuration, foundUser); err != nil {
+		u.logger.Errorf("userUC.FindByID.SetUserCtx error: %v", err)
+	}
 
 	return foundUser, nil
 }

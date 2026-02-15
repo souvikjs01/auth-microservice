@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/souvikjs01/auth-microservice/config"
+	"github.com/souvikjs01/auth-microservice/internal/metric"
 	"github.com/souvikjs01/auth-microservice/internal/session"
 	"github.com/souvikjs01/auth-microservice/internal/user"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
@@ -14,13 +15,15 @@ type userService struct {
 	cfg       *config.Config
 	userUC    user.UserUseCase
 	sessionUC session.SessionUseCase
+	mtr       metric.Metrics
 }
 
-func NewAuthServerGrpc(logger logger.Logger, cfg *config.Config, userUC user.UserUseCase, sessionUC session.SessionUseCase) *userService {
+func NewAuthServerGrpc(logger logger.Logger, cfg *config.Config, userUC user.UserUseCase, sessionUC session.SessionUseCase, mtr metric.Metrics) *userService {
 	return &userService{
 		logger:    logger,
 		cfg:       cfg,
 		userUC:    userUC,
 		sessionUC: sessionUC,
+		mtr:       mtr,
 	}
 }
