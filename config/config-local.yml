@@ -1,6 +1,6 @@
 server:
   AppVersion: 1.0.0-docker
-  Port: :5000
+  Port: :5001
   ProfPort: :5555
   Mode: Development
   JwtSecretKey: secretKey
@@ -16,7 +16,7 @@ server:
   Time: 2
 
 postgres:
-  Host: postgres
+  Host: localhost
   Port: 5432
   User: postgres
   Password: postgres
@@ -25,7 +25,7 @@ postgres:
   PgDriver: pgx
 
 redis:
-  RedisAddr: redis:6379
+  RedisAddr: localhost:6379
   RedisPassword:
   RedisDB: 0
   RedisDefaultdb: 0
@@ -43,10 +43,21 @@ logger:
   Level: info
 
 jaeger:
-  Host: jaeger:6831
+  Host: http://localhost:14268/api/traces
   ServiceName: AUTH_GRPC_SERVER
   LogSpans: true
 
 metrics:
   Url: 0.0.0.0:7070
   ServiceName: AUTH_MICROSERVICE
+
+rabbitmq:
+  Host: localhost
+  Port: 5672
+  User: guest
+  Password: guest
+  Exchange: emails_exchange
+  Queue: emails_queue
+  RoutingKey: emails_routing_key
+  ConsumerTag: emails_consumer
+  WorkerPoolSize: 24

@@ -16,6 +16,7 @@ type Config struct {
 	Jaeger   Jaeger
 	Session  Session
 	Metrics  Metrics
+	RabbitMQ RabbitMQ
 }
 
 type ServerConfig struct {
@@ -86,6 +87,19 @@ type Session struct {
 type Metrics struct {
 	Url         string
 	ServiceName string
+}
+
+// RabbitMQ config
+type RabbitMQ struct {
+	Host           string
+	Port           string
+	User           string
+	Password       string
+	Exchange       string
+	Queue          string
+	RoutingKey     string
+	ConsumerTag    string
+	WorkerPoolSize int
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {
