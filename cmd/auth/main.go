@@ -11,6 +11,7 @@ import (
 	"github.com/souvikjs01/auth-microservice/pkg/jaeger"
 	"github.com/souvikjs01/auth-microservice/pkg/logger"
 	"github.com/souvikjs01/auth-microservice/pkg/postgres"
+	"github.com/souvikjs01/auth-microservice/pkg/rabbitmq"
 	"github.com/souvikjs01/auth-microservice/pkg/redis"
 	"github.com/souvikjs01/auth-microservice/pkg/utils"
 )
@@ -61,6 +62,12 @@ func main() {
 	defer closer.Close()
 	appLogger.Info("Opentracing connected")
 
-	authServer := server.NewAuthServer(appLogger, cfg, pgsqlDB, redisClient)
+	amqpConn, err := rabbitmq.NewRabbitMQConn(cfg)
+	if err != nil {
+		appLogger.Fatalf("cannot create rabbitmq connection: %v", err)
+	}
+	defer amqpConn.Close()
+
+	authServer := server.NewAuthServer(appLogger, cfg, pgsqlDB, redisClient, amqpConn)
 	appLogger.Fatal(authServer.Run())
 }
