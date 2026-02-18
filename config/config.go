@@ -17,8 +17,10 @@ type Config struct {
 	Session  Session
 	Metrics  Metrics
 	RabbitMQ RabbitMQ
+	Smtp     Smtp
 }
 
+// Server configs
 type ServerConfig struct {
 	AppVersion        string
 	Port              string
@@ -100,6 +102,14 @@ type RabbitMQ struct {
 	RoutingKey     string
 	ConsumerTag    string
 	WorkerPoolSize int
+}
+
+// Smtp config
+type Smtp struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {

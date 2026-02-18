@@ -61,3 +61,9 @@ rabbitmq:
   RoutingKey: emails_routing_key
   ConsumerTag: emails_consumer
   WorkerPoolSize: 24
+
+smtp:
+  Host: smtp.gmail.com
+  Port: 587
+  User: your_email@gmail.com
+  Password: your_pass
